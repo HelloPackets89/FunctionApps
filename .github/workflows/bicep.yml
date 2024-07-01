@@ -18,6 +18,6 @@ jobs:
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./DeployFunctionAppGithub.bicep
-        parameters: 'storagePrefix=beeresumequerystorage storageSKU=Standard_LRS'
+        template: ./test2.bicep
+        parameters: 'storagePrefix=githubactionbox storageSKU=Standard_LRS'
         failOnStdErr: false
