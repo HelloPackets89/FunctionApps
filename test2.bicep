@@ -16,6 +16,9 @@ param storageSKU string = 'Standard_LRS'
 
 param location string = resourceGroup().location
 
+/*This variable adds your storage prefix to a unique string based on the resource group ID
+As this uses the resourcegroup ID as a hash, the unique string will always be the same as long as you deploy
+to the same resource group */
 var uniqueStorageName = '${storagePrefix}${uniqueString(resourceGroup().id)}'
 
 resource stg 'Microsoft.Storage/storageAccounts@2021-04-01' = {
