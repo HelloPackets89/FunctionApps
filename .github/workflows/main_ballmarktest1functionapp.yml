@@ -34,5 +34,5 @@ jobs:
       with:
         app-name: ballmarktest1functionapp
         slot-name: Production
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6AE08E896232408EBA20FF034BBD7C17 }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_36020D7F60454709B3D54117E99763FB }}
 
