@@ -1,7 +1,13 @@
 param location string = resourceGroup().location
-param name string = 'beeresumequery'
-param repoUrl string
-param branch string
+param name string = 'ballmarktest1'
+param repoUrl string = 'https://github.com/HelloPackets89/FunctionApps'
+param branch string = 'main'
+param SPSecret string 
+param tenantID string
+param SPID string
+
+//param githubsubject string = 'repo:HelloPackets89/FunctionApps:environment:Production'
+
 
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-04-01' = {
   name: '${name}storage'
@@ -11,7 +17,7 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-04-01' = {
   }
   kind: 'StorageV2'
 }
-var StorageAccountPrimaryAccessKey = listKeys(storageaccount.id, storageaccount.apiVersion).keys[0].value
+var StorageAccountPrimaryAccessKey = storageaccount.listKeys().keys[0].value
 
 resource appinsights 'Microsoft.Insights/components@2020-02-02' ={
   name: '${name}appinsights'
@@ -50,7 +56,7 @@ resource ResumeFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
     siteConfig:{
 //      use32BitWorkerProcess:true //this allows me to use the FREEEEE tier
       alwaysOn:false
-      linuxFxVersion: 'python|3.11'
+      linuxFxVersion: 'python|3.10'
       cors:{
         allowedOrigins: [
           'https://portal.azure.com'
@@ -90,7 +96,7 @@ resource ResumeFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
   }
 }
 
-//setting up github actions
+/*/////setting up github actions
 
 //This blocks the use of git to publish my azure app.. but not github actions?
 resource blockgithub 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2022-09-01' = {
@@ -101,7 +107,7 @@ resource blockgithub 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@202
   }
 }
 
-//This blocks FTP from being used to publish my azure app
+/This blocks FTP from being used to publish my azure app
 resource name_ftp 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2022-09-01' = {
   parent: ResumeFunctionApp
   name: 'ftp'
@@ -109,6 +115,48 @@ resource name_ftp 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2022-0
     allow: false
   }
 }
+
+resource oidcUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: '${name}identity'
+  location: location
+  dependsOn: [
+    ResumeFunctionApp
+  ]
+}
+
+resource oidcUserIdentityName_id 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2022-01-31-preview' = {
+  parent: oidcUserIdentity
+  name: uniqueString(resourceGroup().id)
+  properties: {
+    audiences: [
+      'api://AzureADTokenExchange'
+    ]
+    issuer: 'https://token.actions.githubusercontent.com'
+    subject: githubsubject
+  }
+}
+
+
+/* de139f84-1756-47ae-9be6-808fbbe84772 refers to the built-in Website contributor role. 
+This resource block assigns the Website Contributor role to our new identity which allows it to deploy resources 
+within our scope. 'existing' forces a deployment error if the resource can't be found as opposed to just creating it +/
+
+resource WebsiteContributor 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: 'de139f84-1756-47ae-9be6-808fbbe84772'
+}
+
+resource id_name 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: ResumeFunctionApp
+  name: guid(resourceGroup().id, deployment().name)
+  properties: {
+    roleDefinitionId: WebsiteContributor.id
+    principalId: oidcUserIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
+*/
 
 resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
   parent: ResumeFunctionApp
@@ -124,7 +172,7 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
       generateWorkflowFile: true
       workflowSettings: {
         appType: 'functionapp'
-        authType: 'oidc'
+        authType: 'serviceprincipal'
         publishType: 'code'
         os: 'linux'
         runtimeStack: 'python'
@@ -132,42 +180,34 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
         slotName: 'production'
         variables: {
           runtimeVersion: '3.11'
-          clientId: reference(oidcUserIdentity.id, '2018-11-30').clientId
-          tenantId: reference(oidcUserIdentity.id, '2018-11-30').tenantId
+          clientId: SPID
+          tenantId: tenantID
+          clientSecret: SPSecret
         }
       }
     }
   }
 }
 
-
-resource oidcUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: oidcUserIdentityName
-  location: location
-  properties: {}
-  dependsOn: [
-    name_resource
-  ]
-}
-
-resource oidcUserIdentityName_id 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2022-01-31-preview' = {
-  parent: oidcUserIdentity
-  name: '${uniqueString(resourceGroup().id)}'
+/*
+resource githubactions 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
+  name: 'web'
+  parent: ResumeFunctionApp
   properties: {
-    audiences: [
-      'api://AzureADTokenExchange'
-    ]
-    issuer: 'https://token.actions.githubusercontent.com'
-    subject: 'repo:HelloPackets89/FunctionApps:ref:refs/heads/main'
+    branch: branch
+    deploymentRollbackEnabled: false
+    gitHubActionConfiguration: {
+      codeConfiguration: {
+        runtimeStack: 'python'
+        runtimeVersion: '3.10'
+      }
+      generateWorkflowFile: true
+      isLinux: true
+    }
+    isGitHubAction: true
+    isManualIntegration: false
+    isMercurial: false
+    repoUrl: repoUrl
   }
 }
-
-resource id_name 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: name_resource
-  name: guid(resourceGroup().id, deployment().name)
-  properties: {
-    roleDefinitionId: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/de139f84-1756-47ae-9be6-808fbbe84772'
-    principalId: reference(oidcUserIdentity.id, '2018-11-30').principalId
-    principalType: 'ServicePrincipal'
-  }
-}
+  */
