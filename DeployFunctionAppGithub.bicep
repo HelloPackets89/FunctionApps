@@ -6,9 +6,6 @@ param SPSecret string
 param tenantID string
 param SPID string
 
-//param githubsubject string = 'repo:HelloPackets89/FunctionApps:environment:Production'
-
-
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-04-01' = {
   name: '${name}storage'
   location: location
@@ -54,7 +51,6 @@ resource ResumeFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
     httpsOnly:true
     serverFarmId:hostingplan.id
     siteConfig:{
-//      use32BitWorkerProcess:true //this allows me to use the FREEEEE tier
       alwaysOn:false
       linuxFxVersion: 'python|3.10'
       cors:{
@@ -96,67 +92,8 @@ resource ResumeFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
   }
 }
 
-/*/////setting up github actions
 
-//This blocks the use of git to publish my azure app.. but not github actions?
-resource blockgithub 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2022-09-01' = {
-  parent: ResumeFunctionApp
-  name: 'scm'
-  properties: {
-    allow: false
-  }
-}
-
-/This blocks FTP from being used to publish my azure app
-resource name_ftp 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2022-09-01' = {
-  parent: ResumeFunctionApp
-  name: 'ftp'
-  properties: {
-    allow: false
-  }
-}
-
-resource oidcUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: '${name}identity'
-  location: location
-  dependsOn: [
-    ResumeFunctionApp
-  ]
-}
-
-resource oidcUserIdentityName_id 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2022-01-31-preview' = {
-  parent: oidcUserIdentity
-  name: uniqueString(resourceGroup().id)
-  properties: {
-    audiences: [
-      'api://AzureADTokenExchange'
-    ]
-    issuer: 'https://token.actions.githubusercontent.com'
-    subject: githubsubject
-  }
-}
-
-
-/* de139f84-1756-47ae-9be6-808fbbe84772 refers to the built-in Website contributor role. 
-This resource block assigns the Website Contributor role to our new identity which allows it to deploy resources 
-within our scope. 'existing' forces a deployment error if the resource can't be found as opposed to just creating it +/
-
-resource WebsiteContributor 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: 'de139f84-1756-47ae-9be6-808fbbe84772'
-}
-
-resource id_name 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: ResumeFunctionApp
-  name: guid(resourceGroup().id, deployment().name)
-  properties: {
-    roleDefinitionId: WebsiteContributor.id
-    principalId: oidcUserIdentity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-
-*/
+//This resource assumes a service principal is already created inside your Entra tenant and that its corresponding secrets are configured in your github. 
 
 resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
   parent: ResumeFunctionApp
@@ -170,24 +107,7 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
     isGitHubAction: true
     gitHubActionConfiguration: {
       generateWorkflowFile: true
-  }
-}
-}
-
-/*
-resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
-  parent: ResumeFunctionApp
-  name: 'web'
-  properties: {
-    repoUrl: repoUrl
-    branch: branch
-    isManualIntegration: false
-    deploymentRollbackEnabled: false
-    isMercurial: false
-    isGitHubAction: true
-    gitHubActionConfiguration: {
-      generateWorkflowFile: true
-     /* workflowSettings: {
+      workflowSettings: {
         appType: 'functionapp'
         authType: 'serviceprincipal'
         publishType: 'code'
@@ -205,25 +125,3 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
     }
   }
 }
-
-resource githubactions 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
-  name: 'web'
-  parent: ResumeFunctionApp
-  properties: {
-    branch: branch
-    deploymentRollbackEnabled: false
-    gitHubActionConfiguration: {
-      codeConfiguration: {
-        runtimeStack: 'python'
-        runtimeVersion: '3.10'
-      }
-      generateWorkflowFile: true
-      isLinux: true
-    }
-    isGitHubAction: true
-    isManualIntegration: false
-    isMercurial: false
-    repoUrl: repoUrl
-  }
-}
-  */
