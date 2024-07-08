@@ -1,10 +1,12 @@
 param location string = resourceGroup().location
-param name string = 'ballmarktest1'
-param repoUrl string = 'https://github.com/HelloPackets89/FunctionApps'
+param name string
+param repoUrl string = 'https://github.com/'
 param branch string = 'main'
 param SPSecret string 
 param tenantID string
 param SPID string
+
+
 
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-04-01' = {
   name: '${name}storage'
@@ -92,8 +94,7 @@ resource ResumeFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
   }
 }
 
-
-//This resource assumes a service principal is already created inside your Entra tenant and that its corresponding secrets are configured in your github. 
+//This assumes there is already a Service Principal that already exists and has access to your GitHub
 
 resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
   parent: ResumeFunctionApp
@@ -107,7 +108,7 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
     isGitHubAction: true
     gitHubActionConfiguration: {
       generateWorkflowFile: true
-      workflowSettings: {
+     workflowSettings: {
         appType: 'functionapp'
         authType: 'serviceprincipal'
         publishType: 'code'
