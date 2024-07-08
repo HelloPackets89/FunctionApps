@@ -38,3 +38,4 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
     #test brandon is super cool, how do i publish now? 
     #another test plz commit
     #commit test to see if this changes in azure
+    # 10.35PM - will it work again?

@@ -170,7 +170,24 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
     isGitHubAction: true
     gitHubActionConfiguration: {
       generateWorkflowFile: true
-      workflowSettings: {
+  }
+}
+}
+
+/*
+resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
+  parent: ResumeFunctionApp
+  name: 'web'
+  properties: {
+    repoUrl: repoUrl
+    branch: branch
+    isManualIntegration: false
+    deploymentRollbackEnabled: false
+    isMercurial: false
+    isGitHubAction: true
+    gitHubActionConfiguration: {
+      generateWorkflowFile: true
+     /* workflowSettings: {
         appType: 'functionapp'
         authType: 'serviceprincipal'
         publishType: 'code'
@@ -189,7 +206,6 @@ resource githubactions 'Microsoft.Web/sites/sourcecontrols@2020-12-01' = {
   }
 }
 
-/*
 resource githubactions 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
   name: 'web'
   parent: ResumeFunctionApp
