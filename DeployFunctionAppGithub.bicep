@@ -1,3 +1,8 @@
+//This is a bicep script to deploy the Function App that's connected to your GitHub
+// You'll need to have an existing service principal that has access to your GitHub and contributor access
+// to your resource group or subscription or wherever you want to deploy.
+//To Do: Write up a guide on how to set all that up
+
 param location string = resourceGroup().location
 param name string
 param repoUrl string = 'https://github.com/'
