@@ -5,8 +5,9 @@
 
 param location string = resourceGroup().location
 param name string
-param repoUrl string = 'https://github.com/'
+param repoUrl string = 'https://github.com/HelloPackets89/FunctionApps'
 param branch string = 'main'
+@secure()
 param SPSecret string 
 param tenantID string
 param SPID string
@@ -59,7 +60,7 @@ resource ResumeFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
     serverFarmId:hostingplan.id
     siteConfig:{
       alwaysOn:false
-      linuxFxVersion: 'python|3.10'
+      linuxFxVersion: 'python|3.11'
       cors:{
         allowedOrigins: [
           'https://portal.azure.com'
