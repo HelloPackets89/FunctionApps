@@ -46,6 +46,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
         finally:
 
             # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
-            conn.close()
+            if conn is not None:
+                conn.close()
 
     logging.info('Python timer trigger function executed.')
