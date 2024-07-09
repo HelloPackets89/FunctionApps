@@ -4,4 +4,3 @@
 
 azure-functions
 pyodbc
-GLIBC

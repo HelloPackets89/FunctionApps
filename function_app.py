@@ -12,7 +12,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
         if myTimer.past_due:
             logging.info('The timer is past due!')
 
-        # Get the connection string from the application settings
+        # Get the connection string from the environmental settings. This is the connection string of the Azure SQL DB you want to connect to. 
         conn_str = os.getenv('SQLDB_CONNECTION_STRING')
 
         # Create a new connection
@@ -30,6 +30,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
         for row in rows:
             logging.info(row)
 
+#Error logging - this section provides more verbose errors if the function app fails for whatever reason
     except pyodbc.Error as ex:
         sqlstate = ex.args[0] if len(ex.args) > 0 else None
         logging.error(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
@@ -37,7 +38,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
         logging.error(f'An error occurred: {e}')
     finally:
 
-        # Don't forget to close the connection
+        # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
         conn.close()
 
     logging.info('Python timer trigger function executed.')
