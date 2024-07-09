@@ -16,13 +16,13 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
 
             # Get the connection string from the environmental settings. This is the connection string of the Azure SQL DB you want to connect to. 
             conn_str = os.getenv('SQLDB_CONNECTION_STRING')
-
+            logging.info('Attempting connection')
             # Create a new connection
             conn = pyodbc.connect(conn_str)
 
             # Create a cursor from the connection
             cur = conn.cursor()
-
+            logging.info('Attempting query..')
             # Execute a query
             cur.execute("SELECT TOP (1000) * FROM ResumeVisitors")
 
