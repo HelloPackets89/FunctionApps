@@ -21,7 +21,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
     cur = conn.cursor()
 
     # Execute a query
-    cur.execute("SELECT * FROM VisitorCounter")
+    cur.execute("SELECT TOP (1000) * FROM [dbo].[ResumeVisitors]")
 
     # Fetch all rows from the last executed statement
     rows = cur.fetchall()
@@ -33,9 +33,3 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
     conn.close()
 
     logging.info('Python timer trigger function executed.')
-    
-
-    #test brandon is super cool, how do i publish now? 
-    #another test plz commit
-    #commit test to see if this changes in azure
-    # 10.35PM - will it work again?
