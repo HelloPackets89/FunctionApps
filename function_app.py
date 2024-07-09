@@ -21,7 +21,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
     cur = conn.cursor()
 
     # Execute a query
-    cur.execute("SELECT TOP (1000) * FROM [dbo].[ResumeVisitors]")
+    cur.execute("SELECT TOP (1000) * FROM ResumeVisitors")
 
     # Fetch all rows from the last executed statement
     rows = cur.fetchall()
