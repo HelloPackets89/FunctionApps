@@ -34,10 +34,8 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
 
             for row in rows:
                 logging.info(row)
-            break # This causes the loop to break as hitting this point signifies a successful run. 
-
+            
     #Error logging - this section provides more verbose errors if the function app fails for whatever reason
-    #I've put an attempt under both database errors and exception errors because i've found when I just did database errors, it would fail and not try. 
         except pyodbc.Error as ex:
             sqlstate = ex.args[0] if len(ex.args) > 0 else None
             logging.error(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
@@ -47,10 +45,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
                 logging.error(f'Failed after {max_attempts} attempts.')
         except Exception as e:
             logging.error(f'An error occurred: {e}')
-            if attempt < max_attempts - 1:  # This is because ranges start at 0. So attempt 4, is actually attempt 5. 
-                logging.info(f'Retrying... (Attempt {attempt + 1} of {max_attempts})')
-            else:
-                logging.error(f'Failed after {max_attempts} attempts.')
+
         finally:
 
             # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
