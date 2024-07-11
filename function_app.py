@@ -8,6 +8,9 @@ import datetime
 
 app = func.FunctionApp()
 
+#The timer trigger decorator is what defines when and how often my function is running.
+#The retry decorator defines how often my app will try again if it fails for whatever reason. 
+#Both of these decorators have the "power" to make my function app run again 
 @app.timer_trigger(schedule="0 30 16 * * 5", arg_name="myTimer", run_on_startup=False,
               use_monitor=False) 
 @app.retry(strategy="fixed_delay", max_retry_count="3",
@@ -40,16 +43,16 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         #Fetch all the results of the query and add it to my file
         rows = cur.fetchall()
         all_rows = []
-
+        #For each row found in the query results, combine them into one string. 
         for row in rows:
             all_rows.append(str(row))
-            all_rows_str = '\\n'.join(all_rows)
-            logging.info(all_rows_str)
-            # Upload the row to the blob
-            blob_client.upload_blob(all_rows_str, blob_type="AppendBlob")
+
+        all_rows_str = '\\n'.join(all_rows)
+        logging.info(all_rows_str)
+        # Upload the row to the blob
+        blob_client.upload_blob(all_rows_str, blob_type="AppendBlob")
 
     #Error logging - this section provides more verbose errors if the function app fails for whatever reason.
-    #It also makes the attempt to connect again. Embrace the jank.
     except pyodbc.Error as ex:
         sqlstate = ex.args[0] if len(ex.args) > 0 else None
         logging.error(f'Database error occurred:\\nSQLState: {sqlstate}\\nError: {ex}')
