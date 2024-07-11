@@ -8,8 +8,6 @@ app = func.FunctionApp()
 @app.timer_trigger(schedule="0 30 16 * * 5", arg_name="myTimer", run_on_startup=False,
               use_monitor=False) 
 def timer_trigger1(myTimer: func.TimerRequest) -> None:
-    max_attempts = 5
-    for attempt in range(max_attempts):
         try:
             if myTimer.past_due:
                 logging.info('The timer is past due!')
@@ -32,20 +30,19 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
             for row in rows:
                 logging.info(row)
 
-    #Error logging - this section provides more verbose errors if the function app fails for whatever reason
+    #Error logging - this section provides more verbose errors if the function app fails for whatever reason.
+    #It also makes the attempt to connect again. Embrace the jank.
         except pyodbc.Error as ex:
             sqlstate = ex.args[0] if len(ex.args) > 0 else None
             logging.error(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
-            if attempt < max_attempts - 1:  # This is because ranges start at 0. So attempt 4, is actually attempt 5. 
-                logging.info(f'Retrying... (Attempt {attempt + 1} of {max_attempts})')
-            else:
-                logging.error(f'Failed after {max_attempts} attempts.')
+            timer_trigger1(myTimer)
         except Exception as e:
             logging.error(f'An error occurred: {e}')
+            timer_trigger1(myTimer)
         finally:
 
             # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
             if conn is not None:
                 conn.close()
 
-    logging.info('Python timer trigger function executed.')
+        logging.info('Python timer trigger function executed.')
