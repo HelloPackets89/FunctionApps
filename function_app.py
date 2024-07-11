@@ -31,7 +31,7 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
 
             for row in rows:
                 logging.info(row)
-            break # This causes the loop to break as hitting this point signifies a successful run. 
+            return # This causes the loop to break as hitting this point signifies a successful run. 
 
     #Error logging - this section provides more verbose errors if the function app fails for whatever reason
         except pyodbc.Error as ex:
