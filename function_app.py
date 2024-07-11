@@ -3,6 +3,8 @@ import azure.functions as func
 import os
 import pyodbc
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+import datetime
+
 
 app = func.FunctionApp()
 
@@ -15,8 +17,10 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         if myTimer.past_due:
             logging.info('The timer is past due!')
 
-        # Get the connection string from the environmental settings. This is the connection string of the Azure SQL DB you want to connect to. 
+        # Get the connection string from the environmental settings
+        #This connects to my blob storage and my SQL DB
         conn_str = os.getenv('SQLDB_CONNECTION_STRING')
+        blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
         logging.info('Attempting connection')
         # Create a new connection
         conn = pyodbc.connect(conn_str)
@@ -30,11 +34,11 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Fetch all rows from the last executed statement
         rows = cur.fetchall()
 
-        # Create a BlobServiceClient object which will be used to create a container client
-        blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
-
         # Create a blob client using the local file name as the name for the blob
-        blob_client = blob_service_client.get_blob_client("results", "visitors.txt")
+        #putting "f" infront of strings means it parses the variables inside the string, instead of just putting the name of the variable. 
+        today = datetime.date.today().strftime("%Y%m%d")
+        filename = f"visitors{today}.txt"
+        blob_client = blob_service_client.get_blob_client("results", filename)
 
         for row in rows:
             logging.info(row)
