@@ -47,10 +47,11 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         for row in rows:
             all_rows.append(str(row))
 
-        all_rows_str = '\\n'.join(all_rows)
-        logging.info(all_rows_str)
+        #all_rows_str = '\\n'.join(all_rows)
+        #logging.info(all_rows_str)
+        logging.info(all_rows)
         # Upload the row to the blob
-        blob_client.upload_blob(all_rows_str, blob_type="AppendBlob")
+        blob_client.upload_blob(all_rows, blob_type="AppendBlob")
 
     #Error logging - this section provides more verbose errors if the function app fails for whatever reason.
     except pyodbc.Error as ex:
