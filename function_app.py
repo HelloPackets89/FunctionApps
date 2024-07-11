@@ -31,19 +31,22 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Execute a query
         cur.execute("SELECT TOP (1000) * FROM ResumeVisitors")
 
-        # Fetch all rows from the last executed statement
-        rows = cur.fetchall()
-
         # Create a blob client using the local file name as the name for the blob
         #putting "f" infront of strings means it parses the variables inside the string, instead of just putting the name of the variable. 
         today = datetime.date.today().strftime("%Y%m%d")
         filename = f"visitors{today}.txt"
         blob_client = blob_service_client.get_blob_client("results", filename)
 
+        #Fetch all the results of the query and add it to my file
+        rows = cur.fetchall()
+        all_rows = []
+
         for row in rows:
-            logging.info(row)
+            all_rows.append(str(row))
+            all_rows_str = '\\n'.join(all_rows)
+            logging.info(all_rows_str)
             # Upload the row to the blob
-            blob_client.upload_blob(str(row), blob_type="AppendBlob")
+            blob_client.upload_blob(all_rows_str, blob_type="AppendBlob")
 
     #Error logging - this section provides more verbose errors if the function app fails for whatever reason.
     #It also makes the attempt to connect again. Embrace the jank.
