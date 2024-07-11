@@ -31,7 +31,7 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         rows = cur.fetchall()
 
         # Create a BlobServiceClient object which will be used to create a container client
-        blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AZURE_STORAGE_CONNECTION_STRING'))
+        blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
 
         # Create a blob client using the local file name as the name for the blob
         blob_client = blob_service_client.get_blob_client("results", "visitors.txt")
