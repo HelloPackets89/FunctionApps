@@ -2,6 +2,7 @@ import logging
 import azure.functions as func
 import os
 import pyodbc
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 app = func.FunctionApp()
 
@@ -29,8 +30,16 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Fetch all rows from the last executed statement
         rows = cur.fetchall()
 
+        # Create a BlobServiceClient object which will be used to create a container client
+        blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AZURE_STORAGE_CONNECTION_STRING'))
+
+        # Create a blob client using the local file name as the name for the blob
+        blob_client = blob_service_client.get_blob_client("results", "visitors.txt")
+
         for row in rows:
             logging.info(row)
+            # Upload the row to the blob
+            blob_client.upload_blob(str(row), blob_type="AppendBlob")
 
     #Error logging - this section provides more verbose errors if the function app fails for whatever reason.
     #It also makes the attempt to connect again. Embrace the jank.
@@ -41,16 +50,14 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
             logging.info(
                 f"Max retries of {context.retry_context.max_retry_count} for "
                 f"function {context.function_name} has been reached")
-        else:
-            raise Exception("This is a retryable exception")
+
     except Exception as e:
         logging.error(f'An error occurred: {e}')
         if context.retry_context.retry_count == context.retry_context.max_retry_count:
             logging.info(
                 f"Max retries of {context.retry_context.max_retry_count} for "
                 f"function {context.function_name} has been reached")
-        else:
-            raise Exception("This is a retryable exception")
+
     finally:
 
         # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
