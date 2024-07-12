@@ -8,14 +8,15 @@ import datetime
 
 app = func.FunctionApp()
 
+
 #The timer trigger decorator is what defines when and how often my function is running.
 #The retry decorator defines how often my app will try again if it fails for whatever reason. 
 #Both of these decorators have the "power" to make my function app run again 
-@app.timer_trigger(schedule="0 45 16 * * 5", arg_name="myTimer", run_on_startup=False,
+@app.timer_trigger(schedule="0 30 16 * * 5", arg_name="myTimer", run_on_startup=False,
               use_monitor=False) 
 @app.retry(strategy="fixed_delay", max_retry_count="3",
            delay_interval="00:00:01")
-def timer_trigger30(myTimer: func.TimerRequest, context: func.Context) -> None:
+def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
     try:
         if myTimer.past_due:
             logging.info('The timer is past due!')
