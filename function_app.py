@@ -2,7 +2,7 @@ import os
 import pyodbc
 from azure.storage.blob import BlobServiceClient
 import datetime
-import openai
+from openai import AsyncOpenAI
 import logging
 import azure.functions as func
 
@@ -15,15 +15,12 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
         if myTimer.past_due:
             logging.info('The timer is past due!')
 
-        client = openai.ChatCompletion()
-
-        completion = client.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-            {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
-            ]
+        client = AsyncOpenAI(
+         api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
         )
+        client = AsyncOpenAI()
+        completion = await client.chat.completions.create(model="gpt-3.5-turbo",
+                                                          messages=[{"role": "user", "content": "Hello world"}])
         # Log the content of the first message in the completion choices
         logging.info(completion['choices'][0]['message']['content'])
 
