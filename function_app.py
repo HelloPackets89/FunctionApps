@@ -24,9 +24,9 @@ def timer_trigger1(myTimer: func.TimerRequest) -> None:
             {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
             ]
         )
-        # Print the content of the first message in the completion choices
-        print(completion['choices'][0]['message']['content'])
+        # Log the content of the first message in the completion choices
+        logging.info(completion['choices'][0]['message']['content'])
 
     except Exception as e:
-        # Print any exceptions that occur
-        print(f"An error occurred: {e}")
+        # Log any exceptions that occur
+        logging.error(f"An error occurred: {e}")
