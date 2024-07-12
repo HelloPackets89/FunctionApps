@@ -1,5 +1,3 @@
-
-
 import os
 import pyodbc
 from azure.storage.blob import BlobServiceClient
@@ -12,14 +10,14 @@ app = func.FunctionApp()
 
 @app.timer_trigger(schedule="0 45 16 * * 5", arg_name="myTimer", run_on_startup=False,
               use_monitor=False) 
-def timer_trigger2(myTimer: func.TimerRequest) -> None:
+def timer_trigger1(myTimer: func.TimerRequest) -> None:
     try:
         if myTimer.past_due:
             logging.info('The timer is past due!')
 
-        client = openai()
+        client = openai.ChatCompletion()
 
-        completion = client.chat.completions.create(
+        completion = client.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
