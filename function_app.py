@@ -2,7 +2,7 @@ import logging
 import azure.functions as func
 import os
 import pyodbc
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient
 import datetime
 
 
@@ -52,6 +52,7 @@ def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
         all_rows_str = '\n'.join(all_rows)
         logging.info(all_rows_str)
         # Upload all the results to the storage account using the predefined filename. 
+        # If this file already exists, the attempt to upload will fail. This is intentional. 
         blob_client.upload_blob(all_rows_str)
 
     # Error logging - this section provides more verbose errors if the function app fails for whatever reason.\
