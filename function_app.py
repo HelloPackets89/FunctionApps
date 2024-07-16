@@ -19,7 +19,7 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
 
         prompt = '''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
                     I want to compare results A with results B. Please advise me of the following:
-                    1. Any new visitors
+                    1. Any new visitors and how many visits they have
                     2. Any changes in visit counts
                     3. Any other interesting trends that you've noticed.
                     
