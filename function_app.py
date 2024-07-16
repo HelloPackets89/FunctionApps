@@ -18,10 +18,10 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
         client = AsyncOpenAI(
          api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
         )
-        completion = await client.chat.completions.create(model="gpt-3.5-turbo",
+        response = await client.chat.completions.create(model="gpt-3.5-turbo",
                                                           messages=[{"role": "user", "content": "Hello world"}])
         # Log the content of the first message in the completion choices
-        logging.info(completion['choices'][0]['message']['content'])
+        logging.info(response.choices[0].message.content)
 
     except Exception as e:
         # Log any exceptions that occur
