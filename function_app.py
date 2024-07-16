@@ -6,9 +6,7 @@ from openai import AsyncOpenAI
 import logging
 import azure.functions as func
 
-prompt = '''brandon is awesome
-            and a cool guy
-            tell me 5 reasons why brandon is so awesome please'''
+
 
 app = func.FunctionApp()
 
@@ -18,6 +16,10 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
     try:
         if myTimer.past_due:
             logging.info('The timer is past due!')
+
+        prompt = '''brandon is awesome
+                    and a cool guy
+                    tell me 5 reasons why brandon is so awesome please'''
 
         client = AsyncOpenAI(
          api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
