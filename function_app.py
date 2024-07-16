@@ -17,9 +17,26 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
         if myTimer.past_due:
             logging.info('The timer is past due!')
 
-        prompt = '''brandon is awesome
-                    and a cool guy
-                    tell me 5 reasons why brandon is so awesome please'''
+        prompt = '''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
+                    I want to compare results A with results B. Please advise me of the following:
+                    1. Any new visitors
+                    2. Any changes in visit counts
+                    3. Any other interesting trends that you've noticed.
+                    
+                    Result A:
+                    ('1.1.1.1', 24)
+                    ('2.2.2.2', 1)
+                    ('61.123.456.21', 43)
+                    ('1.2.3.4', 27)
+                    ('51.123.456.21', 23)
+
+                    Result B:
+                    ('1.1.1.1', 30)
+                    ('2.2.2.2', 1)
+                    ('61.123.456.21', 50)
+                    ('1.2.3.4', 30)
+                    ('51.123.456.21', 30)
+                    ('3.3.3.3', 10)'''
 
         client = AsyncOpenAI(
          api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
