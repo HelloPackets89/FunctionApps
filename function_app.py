@@ -22,9 +22,11 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
             if not blobkey:
                 logging.error("BLOB_KEY environment variable not set")
                 return
+            logging.info("setting key")
             #Setup the blob connections for this week and last week
             blob_lastweek = BlobClient.from_connection_string(blobkey, "results", "visitors20240715.txt")
             blob_thisweek = BlobClient.from_connection_string(blobkey, "results", "visitors20240722.txt")
+            logging.info("setting connections")
             #Convert the txt inside the files to something thats useable
             try:
                 data_lastweek = blob_lastweek.download_blob().readall().decode('utf-8')
@@ -37,6 +39,7 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
                 logging.error("Could not find blob 'visitors20240722.txt' in container 'results'")
                 return
             #Log the contents for test purposes
+            logging.info("attempting to output the container text..")
             logging.info(f"The text contained in last week is {data_lastweek}")
             logging.info(f"The text contained in this week is {data_thisweek}")
 
