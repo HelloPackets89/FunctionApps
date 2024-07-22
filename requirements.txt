@@ -5,4 +5,3 @@
 pyodbc
 azure.storage.blob
 openai
-azure.core.exceptions
