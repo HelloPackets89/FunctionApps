@@ -38,8 +38,8 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
             return
         # Log the contents for test purposes
         logging.info("Attempting to output the container text...")
-        logging.info(f"The text contained in last week is {data_lastweek}")
-        logging.info(f"The text contained in this week is {data_thisweek}")
+        logging.warning(f"The text contained in last week is {data_lastweek}")
+        logging.warning(f"The text contained in this week is {data_thisweek}")
 
     except Exception as e:
         # Log any exceptions that occur
