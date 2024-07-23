@@ -9,7 +9,7 @@ from azure.core.exceptions import ResourceNotFoundError
 
 app = func.FunctionApp()
 
-@app.timer_trigger(schedule="0 45 16 * * 5", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
+@app.timer_trigger(schedule="0 45 16 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
 async def timer_trigger1(myTimer: func.TimerRequest) -> None:
     try:
         if myTimer.past_due:
@@ -21,7 +21,7 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
             logging.error("BLOB_KEY environment variable not set")
             return
         #Define the filenames for what I want to access
-        lastweek = (datetime.date.today() - datetime.timedelta(days=7)).strftime("%Y%m%d")
+        lastweek = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y%m%d")
         lastweektxt = f"visitors{lastweek}.txt"
         thisweek = datetime.date.today().strftime("%Y%m%d")
         thisweektxt = f"visitors{thisweek}.txt"
@@ -39,9 +39,25 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
         except ResourceNotFoundError:
             logging.error("Could not find blob 'visitors20240722.txt' in container 'results'")
             return
-        # Log the contents for test purposes. Set it as warning so it stands out. 
-        logging.warning(f"The text contained in last week is {data_lastweek}")
-        logging.warning(f"The text contained in this week is {data_thisweek}")
+        #Define the prompt I want to be using that includes a reference to the data contained in the text files.
+        prompt = f'''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
+                    I want to compare results A with results B. Please advise me of the following:
+                    1. Any new visitors and how many visits they have
+                    2. Any changes in visit counts
+                    3. Any other interesting trends that you've noticed.
+                    
+                    Result A:
+                    {data_lastweek}
+                    Result B:
+                    {data_thisweek}'''
+
+        client = AsyncOpenAI(
+         api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
+        )
+        response = await client.chat.completions.create(model="gpt-3.5-turbo",
+                                                          messages=[{"role": "user", "content": prompt}])
+        # Log the content of the first message in the completion choices
+        logging.warning(response.choices[0].message.content)
 
     except Exception as e:
         # Log any exceptions that occur
