@@ -6,6 +6,7 @@ from openai import AsyncOpenAI
 import logging
 import azure.functions as func
 from azure.core.exceptions import ResourceNotFoundError
+from azure.communication.email import EmailClient
 
 app = func.FunctionApp()
 
@@ -54,10 +55,28 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         client = AsyncOpenAI(
          api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
         )
-        response = await client.chat.completions.create(model="gpt-3.5-turbo",
-                                                          messages=[{"role": "user", "content": prompt}])
+        response = await client.chat.completions.create(model="gpt-3.5-turbo",messages=[{"role": "user", "content": prompt}])
         # Log the content of the first message in the completion choices
-        logging.warning(response.choices[0].message.content)
+        promptresponse = (response.choices[0].message.content)
+        logging.warning(promptresponse)
+
+        #Email the results to me
+        emailkey = os.environ.get('EMAIL_KEY')
+        client = EmailClient.from_connection_string(emailkey)
+
+        message = {
+            "senderAddress": "DoNotReply@brandedkai.net",
+            "recipients":  {
+                "to": [{"address": "brandon@allmark.me" }],
+            },
+            "content": {
+                "subject": f"Visitors analysis of {thisweek}",
+                "plainText": f"{promptresponse}",
+            }
+        }
+
+        poller = client.begin_send(message)
+        result = poller.result()
 
     except Exception as e:
         # Log any exceptions that occur

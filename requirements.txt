@@ -4,4 +4,5 @@
 
 pyodbc
 azure.storage.blob
+azure.communication.email
 openai
