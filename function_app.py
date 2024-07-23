@@ -65,7 +65,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         client = EmailClient.from_connection_string(emailkey)
 
         message = {
-            "senderAddress": "DoNotReply@brandedkai.net",
+            "senderAddress": "Visitor Analysis <DoNotReply@brandedkai.net>",
             "recipients":  {
                 "to": [{"address": "brandon@allmark.me" }],
             },
@@ -76,7 +76,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         }
 
         poller = client.begin_send(message)
-        result = poller.result()
+        poller.result()
 
     except Exception as e:
         # Log any exceptions that occur
