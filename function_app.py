@@ -32,12 +32,12 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         try:
             data_lastweek = blob_lastweek.download_blob().readall().decode('utf-8')
         except ResourceNotFoundError:
-            logging.error("Could not find blob 'visitors20240715.txt' in container 'results'")
+            logging.error(f"Could not find blob {lastweektxt} in container 'results'")
             return
         try:
             data_thisweek = blob_thisweek.download_blob().readall().decode('utf-8')
         except ResourceNotFoundError:
-            logging.error("Could not find blob 'visitors20240722.txt' in container 'results'")
+            logging.error(f"Could not find blob {thisweektxt} in container 'results'")
             return
         #Define the prompt I want to be using that includes a reference to the data contained in the text files.
         prompt = f'''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
