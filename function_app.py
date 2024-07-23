@@ -1,6 +1,6 @@
 import os
 import pyodbc
-from azure.storage.blob import BlobClient 
+from azure.storage.blob import BlobClient, BlobServiceClient
 import datetime
 from openai import AsyncOpenAI
 import logging
@@ -25,7 +25,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Get the connection strings from the environmental settings
         # This connects to my blob storage and my SQL DB
         conn_str = os.getenv('SQLDB_CONNECTION_STRING')
-        blob_service_client = BlobClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
+        blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
         logging.info('Attempting connection')
         # Create a new connection
         conn = pyodbc.connect(conn_str)
