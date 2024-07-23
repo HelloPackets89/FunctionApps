@@ -65,7 +65,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         client = EmailClient.from_connection_string(emailkey)
 
         message = {
-            "senderAddress": "Visitor Analysis <DoNotReply@brandedkai.net>",
+            "senderAddress": "visitormonitor@brandedkai.net",
             "recipients":  {
                 "to": [{"address": "brandon@allmark.me" }],
             },
