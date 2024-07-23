@@ -17,7 +17,7 @@ app = func.FunctionApp()
               use_monitor=False) 
 @app.retry(strategy="fixed_delay", max_retry_count="3",
            delay_interval="00:00:01")
-def timer_trigger1(myTimer: func.TimerRequest, context: func.Context) -> None:
+def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
     try:
         if myTimer.past_due:
             logging.info('The timer is past due!')
