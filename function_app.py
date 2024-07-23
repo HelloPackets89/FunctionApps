@@ -10,7 +10,7 @@ from azure.core.exceptions import ResourceNotFoundError
 app = func.FunctionApp()
 
 @app.timer_trigger(schedule="0 45 16 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
-async def timer_trigger1(myTimer: func.TimerRequest) -> None:
+async def analyse_visits(myTimer: func.TimerRequest) -> None:
     try:
         if myTimer.past_due:
             logging.info('The timer is past due!')
