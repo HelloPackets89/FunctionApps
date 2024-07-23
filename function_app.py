@@ -20,11 +20,14 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
         if not blobkey:
             logging.error("BLOB_KEY environment variable not set")
             return
-        logging.info("Setting key")
+        #Define the filenames for what I want to access
+        lastweek = (datetime.date.today() - datetime.timedelta(days=7)).strftime("%Y%m%d")
+        lastweektxt = f"visitors{lastweek}.txt"
+        thisweek = datetime.date.today().strftime("%Y%m%d")
+        thisweektxt = f"visitors{thisweek}.txt"
         # Setup the blob connections for this week and last week
-        blob_lastweek = BlobClient.from_connection_string(blobkey, "results", "visitors20240715.txt")
-        blob_thisweek = BlobClient.from_connection_string(blobkey, "results", "visitors20240722.txt")
-        logging.info("Setting connections")
+        blob_lastweek = BlobClient.from_connection_string(blobkey, "results", lastweektxt)
+        blob_thisweek = BlobClient.from_connection_string(blobkey, "results", thisweektxt)
         # Convert the txt inside the files to something that's useable
         try:
             data_lastweek = blob_lastweek.download_blob().readall().decode('utf-8')
@@ -36,8 +39,7 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
         except ResourceNotFoundError:
             logging.error("Could not find blob 'visitors20240722.txt' in container 'results'")
             return
-        # Log the contents for test purposes
-        logging.info("Attempting to output the container text...")
+        # Log the contents for test purposes. Set it as warning so it stands out. 
         logging.warning(f"The text contained in last week is {data_lastweek}")
         logging.warning(f"The text contained in this week is {data_thisweek}")
 
