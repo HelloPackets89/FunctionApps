@@ -13,10 +13,8 @@ app = func.FunctionApp()
 #The timer trigger decorator is what defines when and how often my function is running.
 #The retry decorator defines how often my app will try again if it fails for whatever reason. 
 #Both of these decorators have the "power" to make my function app run again 
-@app.timer_trigger(schedule="0 45 8 * * *", arg_name="myTimer", run_on_startup=False,
-              use_monitor=False) 
-@app.retry(strategy="fixed_delay", max_retry_count="3",
-           delay_interval="00:00:01")
+@app.timer_trigger(schedule="0 45 8 * * *", arg_name="myTimer", run_on_startup=False,use_monitor=False) 
+@app.retry(strategy="fixed_delay", max_retry_count="5",delay_interval="00:00:01")
 def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
     try:
         if myTimer.past_due:
@@ -113,14 +111,14 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             return
         #Define the prompt I want to be using that includes a reference to the data contained in the text files.
         prompt = f'''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
-                    I want to compare results A with results B. Please advise me of the following:
+                    I want to compare last week with this week. Please advise me of the following:
                     1. Any new visitors and how many visits they have
                     2. Any changes in visit counts
                     3. Any other interesting trends that you've noticed.
-                    
-                    Result A:
+                    4. Take today's date {thisweek} and tell me an interesting historical thing that happened on the same date.
+                    Last Week:
                     {data_lastweek}
-                    Result B:
+                    This week:
                     {data_thisweek}'''
 
         client = AsyncOpenAI(
