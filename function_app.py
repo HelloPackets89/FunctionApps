@@ -13,6 +13,7 @@ app = func.FunctionApp()
 #The timer trigger decorator is what defines when and how often my function is running.
 #The retry decorator defines how often my app will try again if it fails for whatever reason. 
 #Both of these decorators have the "power" to make my function app run again 
+#FYI Azure CRON jobs are in UTC.. not local time
 @app.timer_trigger(schedule="0 45 8 * * *", arg_name="myTimer", run_on_startup=False,use_monitor=False) 
 @app.retry(strategy="fixed_delay", max_retry_count="5",delay_interval="00:00:01")
 def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
@@ -78,7 +79,8 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
         if conn is not None:
             conn.close()
-
+            
+#FYI Azure CRON jobs are in UTC.. not local time
 @app.timer_trigger(schedule="0 0 9 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
 async def analyse_visits(myTimer: func.TimerRequest) -> None:
     try:
