@@ -2,7 +2,7 @@ import os
 import pyodbc
 from azure.storage.blob import BlobClient, BlobServiceClient
 import datetime
-from openai import AsyncOpenAI
+from openai import AzureOpenAI
 import logging
 import azure.functions as func
 from azure.core.exceptions import ResourceNotFoundError
@@ -123,10 +123,15 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
                     Today:
                     {data_thisweek}'''
 
-        client = AsyncOpenAI(
-         api_key=os.environ['OPENAI_API_KEY'],  # Reference the API key in my function app environment
+        client = AzureOpenAI(
+        api_key = os.getenv("AZURE_OPENAI_API_KEY"),  
+        api_version = "2024-02-01",
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         )
-        response = await client.chat.completions.create(model="gpt-3.5-turbo",messages=[{"role": "user", "content": prompt}])
+
+        response = client.chat.completions.create(
+            model="BrandonAI", # model = "deployment_name".
+            messages=[{"role": "user", "content": prompt}])
         # Log the content of the first message in the completion choices
         promptresponse = (response.choices[0].message.content)
         logging.warning(promptresponse)

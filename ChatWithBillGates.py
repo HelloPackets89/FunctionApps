@@ -18,7 +18,7 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
         api_version = "2024-02-01",
         azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         )
-
+        #Define the prompt I want to be using that includes a reference to the data contained in the text files.
         prompt = f'''Bill I need you to explain the following:
                             Why did you name Microsoft Microsoft and not Megasoft?'''
 
@@ -26,7 +26,6 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
             model="BrandonAI", # model = "deployment_name".
             messages=[{"role": "user", "content": prompt}])
 
-        #Define the prompt I want to be using that includes a reference to the data contained in the text files.
 
         # Log the content of the first message in the completion choices
         promptresponse = (response.choices[0].message.content)
