@@ -23,7 +23,7 @@ async def timer_trigger1(myTimer: func.TimerRequest) -> None:
                             Why did you name Microsoft Microsoft and not Megasoft?'''
 
         response = client.chat.completions.create(
-            model="gpt-35-turbo", # model = "deployment_name".
+            model="BrandonAI", # model = "deployment_name".
             messages=[{"role": "user", "content": prompt}])
 
         #Define the prompt I want to be using that includes a reference to the data contained in the text files.

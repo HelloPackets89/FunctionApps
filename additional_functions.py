@@ -1,5 +1,3 @@
-
-
 import os
 import pyodbc
 from azure.storage.blob import BlobClient, BlobServiceClient
