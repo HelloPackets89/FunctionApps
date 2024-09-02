@@ -28,10 +28,10 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
         if blob_service_client:
             blob_service_client_result = 'Connected to Blob storage successfully'
-            logging.info(blob_service_client_result)
+            logging.critical(blob_service_client_result)
         else:
             blob_service_client_result = 'Connection to Blob storage failed'
-            logging.error(blob_service_client_result)
+            logging.critical(blob_service_client_result)
 
         # Create a new connection
         conn = pyodbc.connect(conn_str)
