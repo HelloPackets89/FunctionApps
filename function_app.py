@@ -14,6 +14,7 @@ app = func.FunctionApp()
 #The retry decorator defines how often my app will try again if it fails for whatever reason. 
 #Both of these decorators have the "power" to make my function app run again 
 #FYI Azure CRON jobs are in UTC.. not local time
+#If you change the cadence of the cronjob you also need to update the delta for lastweek's checks. A daily cronjob is a delta of -1.
 @app.timer_trigger(schedule="0 45 8 * * *", arg_name="myTimer", run_on_startup=False,use_monitor=False) 
 @app.retry(strategy="fixed_delay", max_retry_count="5",delay_interval="00:00:01")
 def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
@@ -61,9 +62,10 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
     # this error logging was ripped from microsoft learn
     except pyodbc.Error as ex:
         sqlstate = ex.args[0] if len(ex.args) > 0 else None
-        logging.error(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
+        sqlstate_error =(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
+        logging.error(sqlstate_error)
         if context.retry_context.retry_count == context.retry_context.max_retry_count:
-            logging.info(
+            logging.error(
                 f"Max retries of {context.retry_context.max_retry_count} for "
                 f"function {context.function_name} has been reached")
 
@@ -79,7 +81,12 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
         if conn is not None:
             conn.close()
-            
+            dbclose_result = ('Connection to DB has been closed.')
+            logging.info(dbclose_result)
+        else:
+            dbclose_result = ('Connection to DB was not closed properly')
+            logging.error(dbclose_result)
+
 #FYI Azure CRON jobs are in UTC.. not local time
 @app.timer_trigger(schedule="0 0 9 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
 async def analyse_visits(myTimer: func.TimerRequest) -> None:
@@ -103,21 +110,28 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         # Convert the txt inside the files to something that's useable
         try:
             data_lastweek = blob_lastweek.download_blob().readall().decode('utf-8')
+            if data_lastweek:
+                blob_lastweek_result = (f"Access to {lastweektxt} was successful.")
+                logging.info(blob_lastweek_result)
         except ResourceNotFoundError:
-            logging.error(f"Could not find blob {lastweektxt} in container 'results'")
+            blob_lastweek_result = (f"Could not find blob {lastweektxt} in container 'results'")
+            logging.error(blob_lastweek_result)
             return
         try:
             data_thisweek = blob_thisweek.download_blob().readall().decode('utf-8')
+            if data_thisweek:
+                data_thisweek_result = (f"Access to {thisweektxt} was successful.")
+                logging.info(data_thisweek_result)            
         except ResourceNotFoundError:
-            logging.error(f"Could not find blob {thisweektxt} in container 'results'")
+            blob_thisweek_result = (f"Could not find blob {thisweektxt} in container 'results'")
+            logging.error(blob_thisweek_result)
             return
         #Define the prompt I want to be using that includes a reference to the data contained in the text files.
         prompt = f'''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
                     I want to compare yesterday with today. Please advise me of the following:
-                    1. Any new visitors and how many visits they have
-                    2. Any changes in visit counts
-                    3. Any other interesting trends that you've noticed.
-                    4. Take today's date {thisweek} and tell me an interesting historical thing that happened on the same date.
+                    1. Any new visitors or changes in visit count
+                    2. Any other interesting trends that you've noticed.
+                    3. Take today's date {thisweek} and tell me an interesting historical thing that happened on the same date.
                     Yesterday:
                     {data_lastweek}
                     Today:
@@ -129,13 +143,34 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         )
 
-        response = client.chat.completions.create(
-            model="BrandonAI", # model = "deployment_name".
-            messages=[{"role": "user", "content": prompt}])
-        # Log the content of the first message in the completion choices
-        promptresponse = (response.choices[0].message.content)
-        logging.warning(promptresponse)
+        try:
+            # Example of sending a test request (e.g., list models)
+            response_test = client.list_models()
+            if response_test:
+                response_result = ("Connection to Azure OpenAI was successful.")
+                logging.info(response_result)
+            else:
+                response_result = ("Connection to Azure OpenAI failed.")
+                logging.error(response_result)
+        except Exception as e:
+                logging.error(f"An error occurred: {e}")
 
+        try:
+            response = client.chat.completions.create(
+                model="BrandonAI", # model = "deployment_name".
+                messages=[{"role": "user", "content": prompt}])
+            # Log the content of the first message in the completion choices
+            promptresponse = (response.choices[0].message.content)
+            logging.warning(promptresponse)
+            if promptresponse:
+                promptresponse_result = ("Prompt was successful, received a response.")
+                logging.info(promptresponse_result)     
+            else:
+                promptresponse_result = ("Prompt was not successful, did not receive response.")
+                logging.error(promptresponse_result)                           
+        except Exception as e:
+        # Log any exceptions that occur
+            logging.error(f"An error occurred: {e}")         
         #Email the results to me
         emailkey = os.environ.get('EMAIL_KEY')
         client = EmailClient.from_connection_string(emailkey)
