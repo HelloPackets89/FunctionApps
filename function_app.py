@@ -29,7 +29,9 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         logging.info('Attempting connection')
         # Create a new connection
         conn = pyodbc.connect(conn_str)
-
+        if conn:
+            sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count} attempts'
+            logging.info(sqlstate_result)
         # Create a cursor from the connection. The cursor is what interacts with my database. 
         # The cursor can be used to "move around" the database and fetch individual rows. I'm just printing everything. 
         cur = conn.cursor()
@@ -62,8 +64,8 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
     # this error logging was ripped from microsoft learn
     except pyodbc.Error as ex:
         sqlstate = ex.args[0] if len(ex.args) > 0 else None
-        sqlstate_error =(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
-        logging.error(sqlstate_error)
+        sqlstate_result =(f'Database error occurred:\nSQLState: {sqlstate}\nError: {ex}')
+        logging.error(sqlstate_result)
         if context.retry_context.retry_count == context.retry_context.max_retry_count:
             logging.error(
                 f"Max retries of {context.retry_context.max_retry_count} for "
@@ -81,10 +83,10 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
         if conn is not None:
             conn.close()
-            dbclose_result = ('Connection to DB has been closed.')
+            dbclose_result = ('Connection to DB was closed successfully.')
             logging.info(dbclose_result)
         else:
-            dbclose_result = ('Connection to DB was not closed properly')
+            dbclose_result = ('Connection to DB was not closed successfully')
             logging.error(dbclose_result)
 
 #FYI Azure CRON jobs are in UTC.. not local time
@@ -144,7 +146,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         )
 
         try:
-            # Example of sending a test request (e.g., list models)
+            # to:do THIS TEST DOES NOT WORK , REPLACE IT
             response_test = client.list_models()
             if response_test:
                 response_result = ("Connection to Azure OpenAI was successful.")
