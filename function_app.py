@@ -36,7 +36,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         # Create a new connection
         conn = pyodbc.connect(conn_str)
         if conn:
-            sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count} attempts'
+            sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count + 1} attempts'
             logging.info(sqlstate_result)
         # Create a cursor from the connection. The cursor is what interacts with my database. 
         # The cursor can be used to "move around" the database and fetch individual rows. I'm just printing everything. 
