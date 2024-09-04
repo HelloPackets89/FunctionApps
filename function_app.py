@@ -26,15 +26,17 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         # This connects to my blob storage and my SQL DB
         conn_str = os.getenv('SQLDB_CONNECTION_STRING')
         blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
+#1 - Blob Storage Connection Test
         if blob_service_client:
             blob_service_client_result = 'Connected to Blob storage successfully'
-            logging.critical(blob_service_client_result)
+            logging.info(blob_service_client_result)
         else:
             blob_service_client_result = 'Connection to Blob storage failed'
-            logging.critical(blob_service_client_result)
+            logging.error(blob_service_client_result)
 
         # Create a new connection
         conn = pyodbc.connect(conn_str)
+#2 - DB Connect Test
         if conn:
             sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count + 1} attempts'
             logging.info(sqlstate_result)
@@ -61,10 +63,26 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
 
         all_rows_str = '\n'.join(all_rows)
         logging.warning(all_rows_str)
+#3 - Query DB Test
+        if all_rows_str:
+            all_rows_str_result = 'Queried DB successfully'
+            logging.info(all_rows_str_result)
+        else:
+            all_rows_str_result = 'Query DB unsuccessfully'
+            logging.error(all_rows_str_result)
         # Upload all the results to the storage account using the predefined filename. 
         # If this file already exists, the attempt to upload will fail. This is intentional. 
         blob_client.upload_blob(all_rows_str)
-
+#4 - Confirm upload was successful
+        blob_data = blob_client.download_blob()
+        blob_contents = blob_data.readall()
+        if blob_contents:
+            blob_contents_results = (f'Uploaded data to {filename} successfully')
+            logging.info(blob_contents_results)
+        else:
+            blob_contents_results = (f'Failed to upload data to {filename}')
+            logging.error(blob_contents_results)
+       
     # Error logging - this section provides more verbose errors if the function app fails for whatever reason.\
     # \n refers to printing a new line
     # this error logging was ripped from microsoft learn
@@ -85,7 +103,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
                 f"function {context.function_name} has been reached")
 
     finally:
-
+#5 - Confirm DB Connection closes
         # Closes the connection to the SQL DB once the function completes. This is to avoid a "leaked" connection.
         if conn is not None:
             conn.close()
