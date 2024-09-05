@@ -54,7 +54,6 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         today = datetime.date.today().strftime("%Y%m%d")
         filename = f"visitors{today}.txt"
         blob_client = blob_service_client.get_blob_client("results", filename)
-
         # Fetch all the results of the query and add it to my file
         rows = cur.fetchall()
         all_rows = []
@@ -113,6 +112,18 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         else:
             dbclose_result = ('#5 - Connection to DB was not closed successfully')
             logging.error(dbclose_result)
+
+
+#Upload results of Smoketests 1 - 5
+        tests1to5 = f'''
+                    {sqlstate_result}
+                    {blob_service_client_result}
+                    {all_rows_str_result}
+                    {blob_contents_results}
+                    {dbclose_result}'''
+        smoketests_filename = f"smoketests_{today}.txt"
+        smoketest_blob_client = blob_service_client.get_blob_client("smoketests", smoketests_filename)
+        smoketest_blob_client.upload_blob(tests1to5)
 
 #FYI Azure CRON jobs are in UTC.. not local time
 @app.timer_trigger(schedule="0 0 9 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
