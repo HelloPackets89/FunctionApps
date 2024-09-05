@@ -190,6 +190,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             if response_test_response:
                 response_result = ("#8 - Connection to Azure OpenAI was successful")
                 logging.warning(response_result)
+            else:
                 response_result = ("#8 - Connection to Azure OpenAI failed.")
                 logging.error(response_result)
         except Exception as e:
