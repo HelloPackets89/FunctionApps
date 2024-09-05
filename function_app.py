@@ -224,6 +224,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
                     {data_tests1to5_results}
                     {blob_lastweek_result}
                     {data_thisweek_result}
+                    {response_result}
                     {promptresponse_result}
                     #10 - Email sent successfully
                     '''
