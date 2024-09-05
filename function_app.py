@@ -182,9 +182,10 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         )
         logging.warning(client)
 
-        try:
+        
 #8 - Confirm API connected successfully. to:do THIS TEST DOES NOT WORK , REPLACE IT
-            response_test = client.list_models()
+        try:
+            response_test = client.get_engine(engine_id="BrandonAI")
             if response_test:
                 response_result = ("#8 - Connection to Azure OpenAI was successful.")
                 logging.warning(response_result)
