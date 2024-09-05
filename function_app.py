@@ -29,7 +29,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
 #1 - Blob Storage Connection Test
         if blob_service_client:
             blob_service_client_result = 'Connected to Blob storage successfully'
-            logging.info(blob_service_client_result)
+            logging.warning(blob_service_client_result)
         else:
             blob_service_client_result = 'Connection to Blob storage failed'
             logging.error(blob_service_client_result)
@@ -39,7 +39,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
 #2 - DB Connect Test
         if conn:
             sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count + 1} attempts'
-            logging.info(sqlstate_result)
+            logging.warning(sqlstate_result)
         # Create a cursor from the connection. The cursor is what interacts with my database. 
         # The cursor can be used to "move around" the database and fetch individual rows. I'm just printing everything. 
         cur = conn.cursor()
@@ -66,7 +66,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
 #3 - Query DB Test
         if all_rows_str:
             all_rows_str_result = 'Queried DB successfully'
-            logging.info(all_rows_str_result)
+            logging.warning(all_rows_str_result)
         else:
             all_rows_str_result = 'Query DB unsuccessfully'
             logging.error(all_rows_str_result)
@@ -78,7 +78,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         blob_contents = blob_data.readall()
         if blob_contents:
             blob_contents_results = (f'Uploaded data to {filename} successfully')
-            logging.info(blob_contents_results)
+            logging.warning(blob_contents_results)
         else:
             blob_contents_results = (f'Failed to upload data to {filename}')
             logging.error(blob_contents_results)
@@ -108,7 +108,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         if conn is not None:
             conn.close()
             dbclose_result = ('Connection to DB was closed successfully.')
-            logging.info(dbclose_result)
+            logging.warning(dbclose_result)
         else:
             dbclose_result = ('Connection to DB was not closed successfully')
             logging.error(dbclose_result)
@@ -139,7 +139,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             data_lastweek = blob_lastweek.download_blob().readall().decode('utf-8')
             if data_lastweek:
                 blob_lastweek_result = (f"Access to {lastweektxt} was successful.")
-                logging.info(blob_lastweek_result)
+                logging.warning(blob_lastweek_result)
         except ResourceNotFoundError:
             blob_lastweek_result = (f"Could not find blob {lastweektxt} in container 'results'")
             logging.error(blob_lastweek_result)
@@ -149,7 +149,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             data_thisweek = blob_thisweek.download_blob().readall().decode('utf-8')
             if data_thisweek:
                 data_thisweek_result = (f"Access to {thisweektxt} was successful.")
-                logging.info(data_thisweek_result)            
+                logging.warning(data_thisweek_result)            
         except ResourceNotFoundError:
             blob_thisweek_result = (f"Could not find blob {thisweektxt} in container 'results'")
             logging.error(blob_thisweek_result)
@@ -177,7 +177,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             response_test = client.list_models()
             if response_test:
                 response_result = ("Connection to Azure OpenAI was successful.")
-                logging.info(response_result)
+                logging.warning(response_result)
             else:
                 response_result = ("Connection to Azure OpenAI failed.")
                 logging.error(response_result)
@@ -194,7 +194,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
 #9 - Confirm a response is received for the prompt
             if promptresponse:
                 promptresponse_result = ("Prompt was successful, received a response.")
-                logging.info(promptresponse_result)     
+                logging.warning(promptresponse_result)     
             else:
                 promptresponse_result = ("Prompt was not successful, did not receive response.")
                 logging.error(promptresponse_result)                           
@@ -221,7 +221,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
 #10 - Confirm email sent successfully
         if poller_result.status == 'Succeeded':
             email_result = 'Email sent successfully'
-            logging.info(email_result)
+            logging.warning(email_result)
         else:
             email_result = 'Email failed to send'
             logging.error(email_result)
