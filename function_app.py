@@ -22,6 +22,9 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         if myTimer.past_due:
             logging.info('The timer is past due!')
 #1 - DB Connect Test
+        # Create a new connection
+        conn_str = os.getenv('SQLDB_CONNECTION_STRING')
+        conn = pyodbc.connect(conn_str)
         if conn:
             sqlstate_result = f'#1 - Successfully connected to the DB after {context.retry_context.retry_count + 1} attempts'
             logging.warning(sqlstate_result)
@@ -31,7 +34,6 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
 
         # Get the connection strings from the environmental settings
         # This connects to my blob storage and my SQL DB
-        conn_str = os.getenv('SQLDB_CONNECTION_STRING')
         blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
 #2 - Blob Storage Connection Test
         if blob_service_client:
@@ -40,10 +42,6 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         else:
             blob_service_client_result = '#2 - Connection to Blob storage failed'
             logging.error(blob_service_client_result)
-
-        # Create a new connection
-        conn = pyodbc.connect(conn_str)
-
 
         # Query my database and get data from the ResumeVisitors table
         logging.warning('Attempting query..')
