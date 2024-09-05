@@ -21,12 +21,19 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
     try:
         if myTimer.past_due:
             logging.info('The timer is past due!')
+#1 - DB Connect Test
+        if conn:
+            sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count + 1} attempts'
+            logging.warning(sqlstate_result)
+        # Create a cursor from the connection. The cursor is what interacts with my database. 
+        # The cursor can be used to "move around" the database and fetch individual rows. I'm just printing everything. 
+        cur = conn.cursor()
 
         # Get the connection strings from the environmental settings
         # This connects to my blob storage and my SQL DB
         conn_str = os.getenv('SQLDB_CONNECTION_STRING')
         blob_service_client = BlobServiceClient.from_connection_string(os.getenv('AzureWebJobsStorage'))
-#1 - Blob Storage Connection Test
+#2 - Blob Storage Connection Test
         if blob_service_client:
             blob_service_client_result = 'Connected to Blob storage successfully'
             logging.warning(blob_service_client_result)
@@ -36,13 +43,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
 
         # Create a new connection
         conn = pyodbc.connect(conn_str)
-#2 - DB Connect Test
-        if conn:
-            sqlstate_result = f'Successfully connected to the DB after {context.retry_context.retry_count + 1} attempts'
-            logging.warning(sqlstate_result)
-        # Create a cursor from the connection. The cursor is what interacts with my database. 
-        # The cursor can be used to "move around" the database and fetch individual rows. I'm just printing everything. 
-        cur = conn.cursor()
+
 
         # Query my database and get data from the ResumeVisitors table
         logging.warning('Attempting query..')
