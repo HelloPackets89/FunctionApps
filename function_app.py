@@ -134,6 +134,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         blob_lastweek = BlobClient.from_connection_string(blobkey, "results", lastweektxt)
         blob_thisweek = BlobClient.from_connection_string(blobkey, "results", thisweektxt)
         # Convert the txt inside the files to something that's useable
+ #6 - Check access to last week's results
         try:
             data_lastweek = blob_lastweek.download_blob().readall().decode('utf-8')
             if data_lastweek:
@@ -143,6 +144,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             blob_lastweek_result = (f"Could not find blob {lastweektxt} in container 'results'")
             logging.error(blob_lastweek_result)
             return
+#7 - Check access to this week's results
         try:
             data_thisweek = blob_thisweek.download_blob().readall().decode('utf-8')
             if data_thisweek:
@@ -168,9 +170,10 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         api_version = "2024-02-01",
         azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         )
+        logging.warning(client)
 
         try:
-            # to:do THIS TEST DOES NOT WORK , REPLACE IT
+#8 - Confirm API connected successfully. to:do THIS TEST DOES NOT WORK , REPLACE IT
             response_test = client.list_models()
             if response_test:
                 response_result = ("Connection to Azure OpenAI was successful.")
@@ -188,6 +191,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             # Log the content of the first message in the completion choices
             promptresponse = (response.choices[0].message.content)
             logging.warning(promptresponse)
+#9 - Confirm a response is received for the prompt
             if promptresponse:
                 promptresponse_result = ("Prompt was successful, received a response.")
                 logging.info(promptresponse_result)     
@@ -213,7 +217,14 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         }
 
         poller = client.begin_send(message)
-        poller.result()
+        poller_result = poller.result()
+#10 - Confirm email sent successfully
+        if poller_result.status == 'Succeeded':
+            email_result = 'Email sent successfully'
+            logging.info(email_result)
+        else:
+            email_result = 'Email failed to send'
+            logging.error(email_result)
 
     except Exception as e:
         # Log any exceptions that occur
