@@ -207,11 +207,6 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         client = EmailClient.from_connection_string(emailkey)
 #10 - Include all results in the email 
         all_results = f'''
-                    {sqlstate_result}
-                    {blob_service_client_result}
-                    {all_rows_str_result}
-                    {blob_contents_results}
-                    {dbclose_result}
                     {blob_lastweek_result}
                     {data_thisweek_result}
                     {response_result}
@@ -224,20 +219,20 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             },
             "content": {
                 "subject": f"Visitors analysis of {thisweek}",
-                "plainText": f"{promptresponse}{all_results}",
+                "plainText": f"{promptresponse} {all_results}",
             }
         }
 
         poller = client.begin_send(message)
         poller.result() 
 #10 - Confirm email sent successfully
-#       poller_result = 
-#       if poller_result.status == 'Succeeded':
-#           email_result = '#10 - Email sent successfully'
-#            logging.warning(email_result)
-#        else:
-#            email_result = '#10 - Email failed to send'
-#            logging.error(email_result)
+        poller_result = poller.result() 
+        if poller_result:
+            email_result = '#10 - Email sent successfully'
+            logging.warning(email_result)
+        else:
+            email_result = '#10 - Email failed to send'
+            logging.error(email_result)
 
     except Exception as e:
         # Log any exceptions that occur
