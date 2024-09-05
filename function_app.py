@@ -215,7 +215,12 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         emailkey = os.environ.get('EMAIL_KEY')
         client = EmailClient.from_connection_string(emailkey)
 #10 - Include all results in the email 
+        tests1to5_resultstxt = f"smoketests_{thisweek}.txt"
+        blob_tests1to5_results = BlobClient.from_connection_string(blobkey, "smoketests", tests1to5_resultstxt)
+        data_tests1to5_results = blob_tests1to5_results.download_blob().readall().decode('utf-8')
+
         all_results = f'''
+                    {data_tests1to5_results}
                     {blob_lastweek_result}
                     {data_thisweek_result}
                     {promptresponse_result}
