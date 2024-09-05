@@ -185,10 +185,11 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         
 #8 - Confirm API connected successfully. to:do THIS TEST DOES NOT WORK , REPLACE IT
         try:
-            response_test = client.get_engine(engine_id="BrandonAI")
-            if response_test:
-                response_result = ("#8 - Connection to Azure OpenAI was successful.")
-                logging.warning(response_result)
+            response_test = client.chat.completions.create(model="BrandonAI", messages=[{"role": "user", "content": 'Hello Mr.AI are you there?'}])
+            response_test_response = (response_test.choices[0].message.content)
+            if response_test_response:
+                response_result = (f"#8 - Connection to Azure OpenAI responds with {response_test_response}")
+                logging.warning(response_result,response_test_response)
             else:
                 response_result = ("#8 - Connection to Azure OpenAI failed.")
                 logging.error(response_result)
