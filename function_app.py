@@ -15,7 +15,7 @@ app = func.FunctionApp()
 #Both of these decorators have the "power" to make my function app run again 
 #FYI Azure CRON jobs are in UTC.. not local time
 #If you change the cadence of the cronjob you also need to update the delta for lastweek's checks. A daily cronjob is a delta of -1.
-@app.timer_trigger(schedule="0 45 8 * * *", arg_name="myTimer", run_on_startup=False,use_monitor=False) 
+@app.timer_trigger(schedule="0 45 8 * * 5", arg_name="myTimer", run_on_startup=False,use_monitor=False) 
 @app.retry(strategy="fixed_delay", max_retry_count="5",delay_interval="00:00:01")
 def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
     try:
@@ -124,7 +124,7 @@ def dbqueryandsave(myTimer: func.TimerRequest, context: func.Context) -> None:
         smoketest_blob_client.upload_blob(tests1to5)
 
 #FYI Azure CRON jobs are in UTC.. not local time
-@app.timer_trigger(schedule="0 0 9 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
+@app.timer_trigger(schedule="0 0 9 * * 5", arg_name="myTimer", run_on_startup=False, use_monitor=False) 
 async def analyse_visits(myTimer: func.TimerRequest) -> None:
     try:
         if myTimer.past_due:
@@ -136,7 +136,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             logging.error("BLOB_KEY environment variable not set")
             return
         #Define the filenames for what I want to access
-        lastweek = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y%m%d")
+        lastweek = (datetime.date.today() - datetime.timedelta(days=7)).strftime("%Y%m%d")
         lastweektxt = f"visitors{lastweek}.txt"
         thisweek = datetime.date.today().strftime("%Y%m%d")
         thisweektxt = f"visitors{thisweek}.txt"
@@ -183,7 +183,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         logging.warning(client)
 
         
-#8 - Confirm API connected successfully. to:do THIS TEST DOES NOT WORK , REPLACE IT
+#8 - Confirm API connected successfully.
         try:
             response_test = client.chat.completions.create(model="BrandonAI", messages=[{"role": "user", "content": 'Hello Mr.AI are you there?'}])
             response_test_response = (response_test.choices[0].message.content)
