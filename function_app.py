@@ -166,11 +166,11 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
             return
         #Define the prompt I want to be using that includes a reference to the data contained in the text files.
         prompt = f'''I have two sets of results that display the Public IP address of my visitors and how many times they've visited. 
-                    I want to compare yesterday with today. Please advise me of the following:
+                    I want to compare last week's visit tally with today. Please advise me of the following:
                     1. Any new visitors or changes in visit count
                     2. Any other interesting trends that you've noticed.
                     3. Take today's date {thisweek} and tell me an interesting historical thing that happened on the same date.
-                    Yesterday:
+                    Last week:
                     {data_lastweek}
                     Today:
                     {data_thisweek}'''
