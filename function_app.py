@@ -185,7 +185,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
         
 #8 - Confirm API connected successfully.
         try:
-            response_test = client.chat.completions.create(model="BrandonAI", messages=[{"role": "user", "content": 'Hello Mr.AI are you there?'}])
+            response_test = client.chat.completions.create(model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-6-luna"), messages=[{"role": "user", "content": 'Hello Mr.AI are you there?'}])
             response_test_response = (response_test.choices[0].message.content)
             if response_test_response:
                 response_result = ("#8 - Connection to Azure OpenAI was successful")
@@ -198,7 +198,7 @@ async def analyse_visits(myTimer: func.TimerRequest) -> None:
 
         try:
             response = client.chat.completions.create(
-                model="BrandonAI", # model = "deployment_name".
+                model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-6-luna"), # model = "deployment_name".
                 messages=[{"role": "user", "content": prompt}])
             # Log the content of the first message in the completion choices
             promptresponse = (response.choices[0].message.content)
